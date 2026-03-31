@@ -85,7 +85,7 @@ The ignored-objects report is written to:
 
 ## Example
 
-If the original image is `HM13-E_r5c4.jpg` and the annotation has `id = 319` and `category_id = 4196`, the outputs are:
+If the original image is `HM13-E_r5c4.jpg` and the annotation has `id = 319`, the outputs are:
 
-- `HM13-E_r5c4_obj_319_class_4196.jpg`
-- `HM13-E_r5c4_obj_319_class_4196.json`
+- `HM13-E_r5c4_obj_319.jpg`
+- `HM13-E_r5c4_obj_319.json`
