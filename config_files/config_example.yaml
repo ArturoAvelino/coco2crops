@@ -12,7 +12,7 @@ crop_images_output_dir: /path/to/output/crop/images
 crop_json_output_dir: /path/to/output/crop/json
 
 # Padding to add around the cropped images
-padding: 60
+padding: 40
 
 # Minimum annotation area (in pixels) required to process an object.
 min_pixels_area: 700
