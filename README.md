@@ -32,6 +32,24 @@ padding: 60
 min_pixels_area: 700
 ```
 
+You can also provide multiple image directories and COCO JSON files by using lists
+of equal length (example: `config_files/config_example_2.yaml`):
+
+```yaml
+image_dir:
+  - /path/to/images/sample_1/
+  - /path/to/images/sample_2/
+json_file:
+  - /path/to/sample_1.json
+  - /path/to/sample_2.json
+crop_images_output_dir: /path/to/output/crop/images
+crop_json_output_dir: /path/to/output/crop/json
+padding: 60
+min_pixels_area: 700
+```
+
+Each `image_dir` entry is paired with the `json_file` at the same index.
+
 ## Usage
 
 ```bash

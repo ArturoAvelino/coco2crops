@@ -1,0 +1,28 @@
+# Path directory to the folder containing the images.
+image_dir:
+  - /path/to/images/sample_1/
+  - /path/to/images/sample_2/
+  - /path/to/images/sample_3/
+  - /path/to/images/sample_4/
+  - ...
+
+# Path to the associated JSON file containing the information and
+# segmentation data of the images.
+json_file:
+  - /path/to/sample_1.json
+  - /path/to/sample_2.json
+  - /path/to/sample_3.json
+  - /path/to/sample_4.json
+  - ...
+
+# Path directory to save the output crop images.
+crop_images_output_dir: /path/to/output/crop/images
+
+# Path directory to save the JSON files of cropped images
+crop_json_output_dir: /path/to/output/crop/json
+
+# Padding to add around the cropped images
+padding: 40
+
+# Minimum annotation area (in pixels) required to process an object.
+min_pixels_area: 700

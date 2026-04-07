@@ -35,6 +35,9 @@ class CocoCropper:
     contains a single image and the corresponding annotation with segmentation
     coordinates transformed to the cropped image coordinate system.
 
+    This class processes one image directory and one COCO JSON file. Use the
+    CLI or config to run it across multiple directory/JSON pairs.
+
     Objects with annotation area smaller than ``min_pixels_area`` are skipped
     and recorded in a CSV report saved next to the crop JSON output directory.
     """
