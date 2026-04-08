@@ -1,12 +1,21 @@
 from __future__ import annotations
 
+import logging
 import argparse
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import yaml
 
+import logging
 from coco_cropper import CocoCropper
+from logger import setup_logger
+
+setup_logger()
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(path: Path) -> Dict[str, Any]:
@@ -116,7 +125,11 @@ def main() -> None:
     args = parser.parse_args()
     settings = resolve_settings(args)
 
+    logger.info("Start cropping")
+
+    i = 1
     for image_dir, json_file in zip(settings["image_dirs"], settings["json_files"]):
+        logger.info(f"Batch: {json_file}, {i}/{len(settings["json_files"])}")
         cropper = CocoCropper(
             image_dir=image_dir,
             json_file=json_file,
@@ -126,6 +139,7 @@ def main() -> None:
             min_pixels_area=int(settings["min_pixels_area"]),
         )
         cropper.run()
+        i+=1
 
 
 if __name__ == "__main__":
