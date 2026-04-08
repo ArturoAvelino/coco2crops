@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from tqdm import tqdm
 import json
 import math
 from dataclasses import dataclass
@@ -74,57 +75,63 @@ class CocoCropper:
 
         ignored_rows: List[Dict[str, Any]] = []
 
-        for ann in coco.get("annotations", []):
-            image_info = images_by_id.get(ann.get("image_id"))
-            if image_info is None:
-                raise ValueError(f"Annotation {ann.get('id')} references missing image_id")
+        annotation_count = len(coco.get("annotations", []))
 
-            area_value = ann.get("area")
-            if area_value is None:
-                area_value = 0
+        with tqdm(total=annotation_count, leave=False) as pbar:           
+            for ann in coco.get("annotations", []):
+                image_info = images_by_id.get(ann.get("image_id"))
+                if image_info is None:
+                    raise ValueError(f"Annotation {ann.get('id')} references missing image_id")
 
-            if float(area_value) < self.min_pixels_area:
-                ignored_rows.append(
-                    {
-                        "image": image_info.get("file_name"),
-                        "object_id": ann.get("id"),
-                        "area": area_value,
-                    }
+                area_value = ann.get("area")
+                if area_value is None:
+                    area_value = 0
+
+                if float(area_value) < self.min_pixels_area:
+                    ignored_rows.append(
+                        {
+                            "image": image_info.get("file_name"),
+                            "object_id": ann.get("id"),
+                            "area": area_value,
+                        }
+                    )
+                    pbar.update(1)
+                    continue
+
+                image_path = self.image_dir / image_info["file_name"]
+                if not image_path.exists():
+                    raise FileNotFoundError(f"Image not found: {image_path}")
+
+                with Image.open(image_path) as img:
+                    img_w, img_h = img.size
+                    bbox = ann.get("bbox")
+                    if not bbox or len(bbox) != 4:
+                        raise ValueError(f"Annotation {ann.get('id')} has invalid bbox")
+
+                    crop_box = self._compute_crop_box(bbox, img_w, img_h)
+                    crop = img.crop((crop_box.x0, crop_box.y0, crop_box.x1, crop_box.y1))
+
+                output_image_name = self._build_output_name(
+                    image_info["file_name"], ann.get("id"), ann.get("category_id"), image_path.suffix
                 )
-                continue
+                output_image_path = self.crop_images_output_dir / output_image_name
+                crop.save(output_image_path)
 
-            image_path = self.image_dir / image_info["file_name"]
-            if not image_path.exists():
-                raise FileNotFoundError(f"Image not found: {image_path}")
+                crop_json = self._build_crop_json(
+                    image_info=image_info,
+                    annotation=ann,
+                    categories=categories,
+                    crop_box=crop_box,
+                    output_image_name=output_image_name,
+                    original_image_size=(img_w, img_h),
+                    category_id_remap=category_id_remap,
+                )
 
-            with Image.open(image_path) as img:
-                img_w, img_h = img.size
-                bbox = ann.get("bbox")
-                if not bbox or len(bbox) != 4:
-                    raise ValueError(f"Annotation {ann.get('id')} has invalid bbox")
-
-                crop_box = self._compute_crop_box(bbox, img_w, img_h)
-                crop = img.crop((crop_box.x0, crop_box.y0, crop_box.x1, crop_box.y1))
-
-            output_image_name = self._build_output_name(
-                image_info["file_name"], ann.get("id"), ann.get("category_id"), image_path.suffix
-            )
-            output_image_path = self.crop_images_output_dir / output_image_name
-            crop.save(output_image_path)
-
-            crop_json = self._build_crop_json(
-                image_info=image_info,
-                annotation=ann,
-                categories=categories,
-                crop_box=crop_box,
-                output_image_name=output_image_name,
-                original_image_size=(img_w, img_h),
-                category_id_remap=category_id_remap,
-            )
-
-            output_json_path = self.crop_json_output_dir / (Path(output_image_name).stem + ".json")
-            with output_json_path.open("w", encoding="utf-8") as f:
-                json.dump(crop_json, f, ensure_ascii=False, indent=2)
+                output_json_path = self.crop_json_output_dir / (Path(output_image_name).stem + ".json")
+                with output_json_path.open("w", encoding="utf-8") as f:
+                    json.dump(crop_json, f, ensure_ascii=False, indent=2)
+                
+                pbar.update(1)
 
         self._write_ignored_objects_csv(ignored_rows)
 
