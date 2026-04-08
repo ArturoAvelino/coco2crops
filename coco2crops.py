@@ -119,22 +119,6 @@ def resolve_settings(args: argparse.Namespace) -> Dict[str, Any]:
         "min_pixels_area": settings_raw["min_pixels_area"],
     }
 
-def process_batch(args_tuple):
-    image_dir, json_file, settings = args_tuple
-
-    logger.info(f"[Thread] Processing {json_file}")
-
-    cropper = CocoCropper(
-            image_dir=image_dir,
-            json_file=json_file,
-            crop_images_output_dir=Path(settings["crop_images_output_dir"]),
-            crop_json_output_dir=Path(settings["crop_json_output_dir"]),
-            padding=int(settings["padding"]),
-            min_pixels_area=int(settings["min_pixels_area"]),
-        )
-    
-    cropper.run()
-
 
 def main() -> None:
     parser = build_arg_parser()
@@ -142,38 +126,20 @@ def main() -> None:
     settings = resolve_settings(args)
 
     logger.info("Start cropping")
-    
-    tasks = [
-        (image_dir, json_file, settings)
-        for image_dir, json_file in zip(settings["image_dirs"], settings["json_files"])
-    ]
-    
-    max_workers = min(32, os.cpu_count() * 4)
-    
-    print(max_workers)
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_batch, t) for t in tasks]
-
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                logger.error(f"Error: {e}")
-
-    # i = 1
-    # for image_dir, json_file in zip(settings["image_dirs"], settings["json_files"]):
-    #     logger.info(f"Batch: {json_file}, {i}/{len(settings["json_files"])}")
-    #     cropper = CocoCropper(
-    #         image_dir=image_dir,
-    #         json_file=json_file,
-    #         crop_images_output_dir=Path(settings["crop_images_output_dir"]),
-    #         crop_json_output_dir=Path(settings["crop_json_output_dir"]),
-    #         padding=int(settings["padding"]),
-    #         min_pixels_area=int(settings["min_pixels_area"]),
-    #     )
-    #     cropper.run()
-    #     i+=1
+    i = 1
+    for image_dir, json_file in zip(settings["image_dirs"], settings["json_files"]):
+        logger.info(f"Batch: {json_file}, {i}/{len(settings["json_files"])}")
+        cropper = CocoCropper(
+            image_dir=image_dir,
+            json_file=json_file,
+            crop_images_output_dir=Path(settings["crop_images_output_dir"]),
+            crop_json_output_dir=Path(settings["crop_json_output_dir"]),
+            padding=int(settings["padding"]),
+            min_pixels_area=int(settings["min_pixels_area"]),
+        )
+        cropper.run()
+        i+=1
 
 
 if __name__ == "__main__":
