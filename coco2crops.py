@@ -4,13 +4,12 @@ import logging
 import argparse
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
-import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import yaml
 
 import logging
-from coco_cropper import CocoCropper
+# from coco_cropper import CocoCropper
+from cropper import CocoCropper
 from logger import setup_logger
 
 setup_logger()
