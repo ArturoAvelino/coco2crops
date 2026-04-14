@@ -101,7 +101,7 @@ The ignored-objects report is written to:
 - `bbox` values are treated as floats but crop bounds are clamped to integer pixel coordinates. Segmentation coordinates remain floats.
 - `distance_left_border` and `distance_top_border` are measured relative to the original image's top-left origin.
 
-## Example
+## Example of Output
 
 If the original image is `HM13-E_r5c4.jpg` and the annotation has `id = 319`, the outputs are:
 
