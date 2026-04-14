@@ -1,2 +1,2 @@
-Pillow>=10.0.0
-PyYAML>=6.0
+pillow==12.1.1
+PyYAML==6.0.3
